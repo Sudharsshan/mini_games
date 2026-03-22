@@ -10,10 +10,10 @@ int minRun = 1, maxRun = 10;
 
 int botHand(){
     // obtain device seed first
-    std::random_device randomDevice;
+    static std::random_device randomDevice;
 
     // use the seed to prepare a MT generator
-    std::mt19937 gen(randomDevice());
+    static std::mt19937 gen(randomDevice());
 
     // now define the limits
     std::uniform_int_distribution<int> distribute(minRun, maxRun);
@@ -89,15 +89,14 @@ int main(){
         std::cout << "CPU's guessed run is: " << CPURun << std::endl;
 
         // check if CPU and player runs match, if so end the game with current score.
-        if(playerRun == CPURun){
-            if(batting) {
+        if(playerRun == CPURun && batting){
                 // player's batting time's over
                 std::cout << "Oops! You are out. Now it's your turn to bowl." << std::endl;
                 std::cout << "Your final score is: " << playerScore << std::endl;
                 batting = !batting; // change from player batting to CPU batting
-            } else {
+        } else if ((CPUscore > playerScore && !batting) || playerRun == CPURun){
                 // Now that both player and CPU batting is done, the game ends
-                std::cout << "Game Over. You've caught the CPU" << std::endl;
+                std::cout << "Game Over." << std::endl;
 
                 std::string whoWon = (playerScore>CPUscore)? "you have defeated the CPU" : "the CPU has deafeated you";
                 std::cout << "Oops! Looks like " << whoWon << "." << std::endl;
@@ -107,12 +106,11 @@ int main(){
 
                 // Take the player to credits scene and end the game.
                 gameOver = true;
-            }
         }
 
         // add the scores
         if(!batting) CPUscore += CPURun; // add the CPU score only when it is playing the batting role
-        if(batting) playerScore += playerRun; // add the player score only when they're playing the batting role
+        else playerScore += playerRun; // add the player score only when they're playing the batting role
 
         // show them to the player
         std::cout << "Player runs: " << playerScore << " || CPU runs: " << CPUscore << std::endl;
